@@ -3,7 +3,7 @@
   tasks:
   - name: add openjdk repo to enable download of openjdk-8
     apt_repository: repo=ppa:openjdk-r/ppa state=present
-  - name: install zsh, git, curl, openjdk-8, maven 
+  - name: install zsh, git, curl, openjdk-8, maven, vim
     apt: name={{ item }} update_cache=yes
     with_items:
       - zsh
@@ -11,13 +11,21 @@
       - git
       - openjdk-8-jdk
       - maven
+      - vim
   - name: make zsh default
     shell:  chsh -s /bin/zsh vagrant
   - name: install oh-my-zsh
     shell: sh -c '$(curl -fsSL https://raw.github.com/robbyrussell/oh-my-zsh/master/tools/install.sh)'
   - name: download IntelliJ from centerdevice
     get_url: url=https://public.centerdevice.de/download/8adbcadf-a6e1-4fce-b2a3-f4748cb5d234.8a1681b0-578b-46d1-8efd-8a35fbb6db80 dest=/opt/intellij.tar.gz validate_certs=no
-  - name: create directory for IntelliJ
-    file: path=/opt/IntelliJ state=directory
+  - name: download Eclipse from centerdevice
+    get_url: url=https://public.centerdevice.de/download/51c5bc60-8cd5-484b-bf08-ba07345661f5.4665a281-3da0-4cdd-b618-2c9db6ca3b9f dest=/opt/eclipse.tar.gz validate_certs=no
+  - name: create directory for IntelliJ and Eclipse
+    file: path={{ item }} state=directory
+    with_items:
+      - /opt/IntelliJ
+      - /opt/Eclipse
   - name: unpack IntelliJ
     unarchive: src=/opt/intellij.tar.gz dest=/opt/IntelliJ
+  - name: unpack Eclipse
+    unarchive: src=/opt/eclipse.tar.gz dest=/opt/Eclipse
