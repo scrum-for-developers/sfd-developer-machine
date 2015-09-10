@@ -29,3 +29,5 @@
     unarchive: src=/opt/intellij.tar.gz dest=/opt/IntelliJ
   - name: unpack Eclipse
     unarchive: src=/opt/eclipse.tar.gz dest=/opt/Eclipse
+  - name: set global path to java 8 in /etc/profile
+    lineinfile: dest=/etc/profile line="export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64 state=present"
