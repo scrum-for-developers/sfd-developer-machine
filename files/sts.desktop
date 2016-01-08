@@ -1,0 +1,8 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Spring tool suite
+Icon=/opt/Eclipse/sts-bundle/sts-3.7.0.RELEASE/icon.xpm
+Exec=/opt/Eclipse/sts-bundle/sts-3.7.0.RELEASE/STS
+Categories=Development;IDE;
+Terminal=false
