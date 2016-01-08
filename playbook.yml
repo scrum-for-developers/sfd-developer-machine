@@ -2,9 +2,13 @@
 - hosts: all
   tasks:
   - name: add openjdk repo to enable download of openjdk-8
-    apt_repository: repo=ppa:openjdk-r/ppa state=present
-  - name: install zsh, git, openjdk-8, maven, vim, mysql-server, python-mysqldb
-    apt: name={{ item }} update_cache=yes
+    apt_repository:
+      repo=ppa:openjdk-r/ppa
+      state=present
+  - name: install zsh, git, curl, openjdk-8, maven, vim, mysql-server, python-mysqldb
+    apt:
+      name={{ item }}
+      update_cache=yes
     with_items:
       - zsh
       - git
