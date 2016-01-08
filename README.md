@@ -20,8 +20,8 @@ Assuming you have [Vagrant](https://www.vagrantup.com/) already installed on you
 ### Other stuff that happens
   * Ansible downloads IntelliJ Community Edition and Spring Tool Suite from Centerdevice (because URLs don't change there).
   * It unzips it to
-    * /opt/IntelliJ
-    * /opt/Eclipse
+    * ```/opt/IntelliJ```
+    * ```/opt/Eclipse```
   * Global Path to Java8 gets set
   * Desktop links and necessary folders get created
   * The worblehat database get's created with
