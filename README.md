@@ -28,8 +28,8 @@ Assuming you have [Vagrant](https://www.vagrantup.com/) already installed on you
     * user: worblehat
     * password worblehat
 
-### Steps you still need to to by hand
-These steps are recommended if you want to provide a ready-to-go VM to training participants
+### Things you still need to to by hand
+These steps are recommended if you want to provide a ready-to-go VM to training participants. Execute them inside the VM.
   * Open a terminal and checkout the [worblehat application](https://github.com/scrum-for-developers/worblehat).
   * Do a ```mvn clean install``` inside the application path to download all necessary dependencies, so that the participants don't need to anymore, which speeds up the training.
   * Remove the checked out project afterwards (The training participants get their own copies of the repository).
