@@ -34,6 +34,4 @@ These steps are recommended if you want to provide a ready-to-go VM to training 
   * Do a ```mvn clean install``` inside the application path to download all necessary dependencies, so that the participants don't need to anymore, which speeds up the training.
   * Remove the checked out project afterwards (The training participants get their own copies of the repository).
   * Optional (**Attention:** You shouldn't use the installed IDEAs for the optional tasks. Otherwise you'd create personalized settings which shall be left for the training participants.)
-    * Enter ```worblehat-web``` and run ```mvn spring-boot:run``` and check ```localhost:8080/worblehat``` to see if the application works. The application will run against an in-memory database.
-    * Modify ```worblehat-web/src/main/resources/application.properties```.
-    Remove the hashtags before the database configuration to test if the local database is working. Restart the application and check  ```localhost:8080/worblehat``` again. The application should now run against the installed mysql database.
+    * Enter ```worblehat-web``` and run ```mvn spring-boot:run``` and check ```localhost:8080/worblehat``` to see if the application works. The application will run against the installed sql database, so don't forget to remove the created tables afterwards.
