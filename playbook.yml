@@ -5,7 +5,7 @@
     apt_repository:
       repo=ppa:openjdk-r/ppa
       state=present
-  - name: install zsh, git, curl, openjdk-8, maven, vim, mysql-server, python-mysqldb
+  - name: install zsh, git, curl, openjdk-8, maven, vim, mysql-server, python-mysqldb, chromium
     apt:
       name={{ item }}
       update_cache=yes
@@ -17,6 +17,7 @@
       - vim
       - mysql-server
       - python-mysqldb
+      - chromium-browser
   - name: Clone oh-my-zsh repo
     git: repo=https://github.com/robbyrussell/oh-my-zsh.git dest=/home/$user/.oh-my-zsh
   - name: Set zsh as default shell
