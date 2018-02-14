@@ -1,69 +1,131 @@
 ---
 - hosts: all
+  sudo: True
+  vars:
+    apt_file: /etc/apt/sources.list.d/google-chrome.list
+    user: vagrant
+    zsh_theme: steeef
+    worblehat_db: worblehat_test
+    worblehat_user: worblehat
+
   tasks:
-  - name: add openjdk repo to enable download of openjdk-8
-    apt_repository:
-      repo=ppa:openjdk-r/ppa
-      state=present
-  - name: install zsh, git, curl, openjdk-8, maven, vim, mysql-server, python-mysqldb, chromium
-    apt:
-      name={{ item }}
-      update_cache=yes
-    with_items:
-      - zsh
-      - git
-      - openjdk-8-jdk
-      - maven
-      - vim
-      - mysql-server
-      - python-mysqldb
-      - chromium-browser
-  - name: Clone oh-my-zsh repo
-    git: repo=https://github.com/robbyrussell/oh-my-zsh.git dest=/home/$user/.oh-my-zsh
-  - name: Set zsh as default shell
-    user: name=$user shell=/bin/zsh
-  - name: download IntelliJ from centerdevice
-    get_url: url=https://public.centerdevice.de/download/8adbcadf-a6e1-4fce-b2a3-f4748cb5d234.8a1681b0-578b-46d1-8efd-8a35fbb6db80 dest=/opt/intellij.tar.gz validate_certs=no
-  - name: download Eclipse from centerdevice
-    get_url: url=https://public.centerdevice.de/download/51c5bc60-8cd5-484b-bf08-ba07345661f5.4665a281-3da0-4cdd-b618-2c9db6ca3b9f dest=/opt/eclipse.tar.gz validate_certs=no
-  - name: create directory for IntelliJ and Eclipse
-    file: path={{ item }} state=directory
-    with_items:
-      - /opt/IntelliJ
-      - /opt/Eclipse
-  - name: unpack IntelliJ
-    unarchive:
-      src=/opt/intellij.tar.gz
-      dest=/opt/IntelliJ
-  - name: unpack Eclipse
-    unarchive:
-      src=/opt/eclipse.tar.gz
-      dest=/opt/Eclipse
-  - name: set global path to java 8 in /etc/profile
-    lineinfile:
-      dest=/etc/profile
-      line="export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
-      state=present"
-  - name: create Desktop files for IntelliJ and Eclipse
-    template:
-      src=files/{{ item }}.desktop
-      dest=/home/vagrant/Desktop owner=vagrant
-    with_items:
-      - sts
-      - jetbrains-idea-ce
-  - name: create IntelliJ folder
-    file:
-      path=/home/vagrant/IdeaProjects
-      state=directory
-      mode=0755
-      owner=vagrant
-  - name: create empty Worblehat database
-    mysql_db:
-      name=worblehat
-      state=present
-  - name: create Worblehat database user
-    mysql_user:
-      name=worblehat
-      password=worblehat
-      state=present
-      priv=worblehat.*:ALL
+    # Adding google chrome 
+    - name: Does the Google apt file exist?
+      command: test -f {{ apt_file }}
+      register: google_apt_exists
+      ignore_errors: True
+
+    - name: Add Google Chrome key
+      shell: wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add -
+      when: google_apt_exists.rc == 1
+
+    - name: Add Google Chrome repo
+      shell: echo 'deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main' | sudo tee /etc/apt/sources.list.d/google-chrome.list
+      when: google_apt_exists.rc == 1
+
+    - name: Update apt cache
+      apt: update_cache=yes
+      when: google_apt_exists.rc == 1
+
+    - name: Install Google Chrome
+      apt: pkg=google-chrome-stable state=installed
+
+    - name: add openjdk repo to enable download of openjdk-8
+      apt_repository:
+        repo=ppa:openjdk-r/ppa
+        state=present
+
+    #Adding additional requirements
+    - name: install zsh, git, curl, openjdk-8-jre, maven, vim, mysql-server, python-mysqldb
+      apt:
+        name={{ item }}
+        update_cache=yes
+      with_items:
+        - zsh
+        - git
+        - openjdk-8-jdk
+        - openjdk-8-jre
+        - maven
+        - vim
+        - mysql-server
+        - python-mysqldb
+
+    #Shell beautification
+    - name: Clone oh-my-zsh repo
+      git: repo=https://github.com/robbyrussell/oh-my-zsh.git dest=/home/{{ user }}/.oh-my-zsh
+
+    - name: Set zsh as default shell
+      user: name={{ user }} shell=/bin/zsh
+
+    - name: Create conf folder in home directory
+      file: path=/home/{{ user }}/conf state=directory owner={{ user }}
+
+    - name: deploy .zshrc
+      template: src=files/zshrc.sh dest=/home/{{ user }}/conf/zshrc owner={{ user }}
+
+    - name: remove standard zshrc
+      file: path=/home/{{ user }}/.zshrc state=absent
+
+    - name: symlink zshrc
+      file: path=/home/{{ user }}/.zshrc src=/home/{{ user }}/conf/zshrc state=link owner={{ user }}
+
+    #Configuring java
+    - name: set global path to java 8 in /etc/profile
+      lineinfile:
+        dest=/etc/profile
+        line="export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64"
+        state=present
+
+    - name: set java to java 8
+      shell: update-java-alternatives --set /usr/lib/jvm/java-1.8.0-openjdk-amd64
+
+    #Download and install IDEAs
+    - name: download IntelliJ from centerdevice
+      get_url: url=https://public.centerdevice.de/download/8adbcadf-a6e1-4fce-b2a3-f4748cb5d234.8a1681b0-578b-46d1-8efd-8a35fbb6db80 dest=/opt/intellij.tar.gz validate_certs=no
+    
+    - name: download Eclipse from centerdevice
+      get_url: url=https://public.centerdevice.de/download/51c5bc60-8cd5-484b-bf08-ba07345661f5.4665a281-3da0-4cdd-b618-2c9db6ca3b9f dest=/opt/eclipse.tar.gz validate_certs=no
+    
+    - name: create directory for IntelliJ and Eclipse
+      file: path={{ item }} state=directory
+      with_items:
+        - /opt/IntelliJ
+        - /opt/Eclipse
+    
+    - name: unpack IntelliJ
+      unarchive:
+        src=/opt/intellij.tar.gz
+        dest=/opt/IntelliJ
+    
+    - name: unpack Eclipse
+      unarchive:
+        src=/opt/eclipse.tar.gz
+        dest=/opt/Eclipse
+    
+    - name: create Desktop files for IntelliJ and Eclipse
+      template:
+        src=files/{{ item }}.desktop
+        dest=/home/vagrant/Desktop owner=vagrant
+      with_items:
+        - sts
+        - jetbrains-idea-ce
+    
+    - name: create IntelliJ folder
+      file:
+        path=/home/vagrant/IdeaProjects
+        state=directory
+        mode=0755
+        owner=vagrant
+    
+    #Create Database for worblehat
+    - name: create empty Worblehat database
+      mysql_db:
+        name={{ worblehat_db }}
+        state=present
+
+    - name: create Worblehat database user
+      mysql_user:
+        name={{ worblehat_user }}
+        password={{ worblehat_user }}
+        state=present
+        priv={{ worblehat_db }}.*:ALL
