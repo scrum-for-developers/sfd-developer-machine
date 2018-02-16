@@ -102,10 +102,17 @@
         src=/opt/eclipse.tar.gz
         dest=/opt/Eclipse
     
+    - name: Create Desktop directory, if not existant
+      file:
+        path=/home/vagrant/Desktop
+        state=directory
+        mode=0755
+        owner=vagrant
+
     - name: create Desktop files for IntelliJ and Eclipse
       template:
         src=files/{{ item }}.desktop
-        dest=/home/vagrant/Desktop owner=vagrant
+        dest=/home/vagrant/Desktop/{{ item }}.desktop owner=vagrant
       with_items:
         - sts
         - jetbrains-idea-ce
@@ -129,3 +136,21 @@
         password={{ worblehat_user }}
         state=present
         priv={{ worblehat_db }}.*:ALL
+
+    - name: Change timezone
+      shell: timedatectl set-timezone Europe/Berlin
+            
+    # Apparently this has to happen in the end - or at least after the zsh tasks
+    #Configuring keyboard
+    - name: set german keyboard in /etc/profile
+      lineinfile:
+        dest=/etc/profile
+        line="setxkbmap de"
+        state=present
+
+    - name: switch to German keyboard layout
+      shell: |
+        setxkbmap de
+        sed -i 's/XKBLAYOUT=\"\w*"/XKBLAYOUT=\"de\"/g' /etc/default/keyboard
+        udevadm trigger --subsystem-match=input --action=change
+
